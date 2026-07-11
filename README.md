@@ -39,8 +39,7 @@ This repository is updated after every episode.
 
 ## 📺 YouTube Playlist
 
-Coming Soon
-
+https://www.youtube.com/playlist?list=PLF4drO8z96Rc)
 ---
 
 ## 🤝 Connect with Me
