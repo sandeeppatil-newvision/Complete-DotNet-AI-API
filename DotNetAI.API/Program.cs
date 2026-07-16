@@ -1,5 +1,6 @@
 using Azure;
 using Azure.AI.OpenAI;
+using OpenAI;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,6 +18,12 @@ builder.Services.AddSingleton(sp =>
     return new AzureOpenAIClient(
         new Uri(config["AzureOpenAI:Endpoint"]!),
         new AzureKeyCredential(config["AzureOpenAI:ApiKey"]!));
+});
+
+builder.Services.AddSingleton<OpenAIClient>(sp =>
+{
+    var config = sp.GetRequiredService<IConfiguration>();
+    return new OpenAIClient(config["OpenAI:ApiKey"]!);
 });
 
 var app = builder.Build();

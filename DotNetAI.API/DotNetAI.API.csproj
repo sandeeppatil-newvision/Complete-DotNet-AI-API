@@ -9,6 +9,7 @@
   <ItemGroup>
     <PackageReference Include="Azure.AI.OpenAI" Version="2.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.5" />
+    <PackageReference Include="OpenAI" Version="2.1.0" />
     <PackageReference Include="Scalar.AspNetCore" Version="2.16.11" />
   </ItemGroup>
 
