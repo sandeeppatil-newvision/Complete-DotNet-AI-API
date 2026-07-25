@@ -2,6 +2,8 @@ using Azure;
 using Azure.AI.OpenAI;
 using OpenAI;
 using Scalar.AspNetCore;
+using Microsoft.SemanticKernel;
+using DotNetAI.API.Plugins;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,6 +26,19 @@ builder.Services.AddSingleton<OpenAIClient>(sp =>
 {
     var config = sp.GetRequiredService<IConfiguration>();
     return new OpenAIClient(config["OpenAI:ApiKey"]!);
+});
+
+builder.Services.AddSingleton(sp =>
+{
+    var config = sp.GetRequiredService<IConfiguration>();
+    var kb = Kernel.CreateBuilder();
+    kb.AddAzureOpenAIChatCompletion(
+        deploymentName: config["AzureOpenAI:DeploymentName"]!,
+        endpoint: config["AzureOpenAI:Endpoint"]!,
+        apiKey: config["AzureOpenAI:ApiKey"]!);
+    var kernel = kb.Build();
+    kernel.Plugins.AddFromType<DevToolsPlugin>(); // we build this next
+    return kernel;
 });
 
 var app = builder.Build();
