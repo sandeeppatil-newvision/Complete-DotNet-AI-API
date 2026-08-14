@@ -1,9 +1,10 @@
 using Azure;
 using Azure.AI.OpenAI;
+using DotNetAI.API.Plugins;
+using DotNetAI.API.Services;
+using Microsoft.SemanticKernel;
 using OpenAI;
 using Scalar.AspNetCore;
-using Microsoft.SemanticKernel;
-using DotNetAI.API.Plugins;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,6 +41,7 @@ builder.Services.AddSingleton(sp =>
     kernel.Plugins.AddFromType<DevToolsPlugin>(); // we build this next
     return kernel;
 });
+builder.Services.AddSingleton<RagService>();
 
 var app = builder.Build();
 
