@@ -42,6 +42,7 @@ builder.Services.AddSingleton(sp =>
     return kernel;
 });
 builder.Services.AddSingleton<RagService>();
+builder.Services.AddSingleton<ConversationService>();
 
 var app = builder.Build();
 
