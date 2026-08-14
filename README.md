@@ -11,9 +11,9 @@ This repository contains the official source code for my YouTube series.
 | Episode | Topic | Status |
 |----------|-------------------------------|--------|
 | EP01 | Development Environment Setup | ✅ |
-| EP02 | Build Your First AI App | 🔜 |
-| EP03 | Semantic Kernel | 🔜 |
-| EP04 | Prompt Engineering | 🔜 |
+| EP02 | Build Your First AI App | ✅ |
+| EP03 | Semantic Kernel | ✅ |
+| EP04 | Prompt Engineering | ✅ |
 | EP05 | RAG | 🔜 |
 | EP06 | AI Agents | 🔜 |
 
