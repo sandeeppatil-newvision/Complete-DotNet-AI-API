@@ -39,6 +39,7 @@ builder.Services.AddSingleton(sp =>
         apiKey: config["AzureOpenAI:ApiKey"]!);
     var kernel = kb.Build();
     kernel.Plugins.AddFromType<DevToolsPlugin>(); // we build this next
+    kernel.Plugins.AddFromType<ProjectPlugin>();
     return kernel;
 });
 builder.Services.AddSingleton<RagService>();
@@ -57,6 +58,8 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+
+app.UseStaticFiles();
 
 app.MapControllers();
 
