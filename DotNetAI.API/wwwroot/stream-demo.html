@@ -1,0 +1,292 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Streaming Demo — DotNetAI.Api EP06</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, system-ui, sans-serif;
+            background: #0d1117;
+            color: #e6edf3;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 720px;
+            padding: 40px 24px;
+        }
+
+        h1 {
+            font-size: 22px;
+            color: #4C9EFF;
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+
+        .subtitle {
+            font-size: 13px;
+            color: #6e7a8a;
+            margin-bottom: 28px;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 8px;
+            background: #161b22;
+            border: 1px solid #30363d;
+            color: #e6edf3;
+            font-size: 14px;
+            font-family: inherit;
+            resize: none;
+            height: 80px;
+            outline: none;
+        }
+
+            textarea:focus {
+                border-color: #4C9EFF;
+            }
+
+        .actions {
+            margin-top: 12px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        button {
+            padding: 9px 20px;
+            border-radius: 6px;
+            border: none;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background .15s;
+        }
+
+        #streamBtn {
+            background: #1f6feb;
+            color: #fff;
+        }
+
+            #streamBtn:hover {
+                background: #388bfd;
+            }
+
+            #streamBtn:disabled {
+                background: #21262d;
+                color: #6e7a8a;
+                cursor: not-allowed;
+            }
+
+        #clearBtn {
+            background: #21262d;
+            color: #c9d1d9;
+            border: 1px solid #30363d;
+        }
+
+            #clearBtn:hover {
+                background: #30363d;
+            }
+
+        .status {
+            font-size: 12px;
+            color: #6e7a8a;
+            margin-left: auto;
+        }
+
+            .status.streaming {
+                color: #4C9EFF;
+            }
+
+            .status.done {
+                color: #34D399;
+            }
+
+        .output-wrap {
+            margin-top: 20px;
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 10px;
+            padding: 20px;
+            min-height: 120px;
+        }
+
+        .output-label {
+            font-size: 11px;
+            color: #6e7a8a;
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            margin-bottom: 12px;
+        }
+
+        #output {
+            font-size: 15px;
+            line-height: 1.75;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 2px;
+            height: 16px;
+            background: #4C9EFF;
+            margin-left: 2px;
+            vertical-align: -2px;
+            animation: blink 1s step-start infinite;
+        }
+
+        @keyframes blink {
+            50% {
+                opacity: 0;
+            }
+        }
+
+        .compare-note {
+            margin-top: 16px;
+            padding: 12px 14px;
+            background: #0f1923;
+            border-radius: 6px;
+            border-left: 3px solid #4C9EFF;
+            font-size: 12px;
+            color: #6e7a8a;
+            line-height: 1.6;
+        }
+
+            .compare-note strong {
+                color: #4C9EFF;
+            }
+
+        code {
+            background: #21262d;
+            padding: 1px 5px;
+            border-radius: 3px;
+            font-size: 11px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚡ Streaming AI — DotNetAI.Api</h1>
+        <p class="subtitle">POST /api/stream/chat — tokens arrive word by word in real time</p>
+
+        <textarea id="msg" placeholder="Ask anything about .NET, C#, Azure…">Explain dependency injection in .NET with a simple code example</textarea>
+
+        <div class="actions">
+            <button id="streamBtn" onclick="stream()">⚡ Stream response</button>
+            <button id="clearBtn" onclick="clearOutput()">Clear</button>
+            <span class="status" id="status">Ready</span>
+        </div>
+
+        <div class="output-wrap">
+            <div class="output-label">Response</div>
+            <div id="output"><span style="color:#30363d">Your answer will appear here token by token…</span></div>
+        </div>
+
+        <div class="compare-note">
+            <strong>How this works:</strong>
+            The browser sends a POST to <code>/api/stream/chat</code>.
+            ASP.NET Core keeps the connection open and writes each token with
+            <code>await Response.Body.FlushAsync()</code> — no buffering.
+            The browser reads with <code>response.body.getReader()</code> and appends
+            each token to the DOM as it arrives. No WebSockets. Standard HTTP.
+        </div>
+    </div>
+
+    <script>
+  let isStreaming = false;
+
+  async function stream() {
+    const msg = document.getElementById('msg').value.trim();
+    if (!msg || isStreaming) return;
+
+    isStreaming = true;
+    const btn    = document.getElementById('streamBtn');
+    const status = document.getElementById('status');
+    const output = document.getElementById('output');
+
+    btn.disabled        = true;
+    status.textContent  = '● Streaming…';
+    status.className    = 'status streaming';
+    output.innerHTML    = '<span class="cursor"></span>';
+
+    try {
+      const response = await fetch('/api/stream/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: msg })
+      });
+
+      if (!response.ok) {
+        output.textContent = 'Error: ' + response.status;
+        return;
+      }
+
+      const reader  = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '', text = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop();
+
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          const data = line.slice(6).trim();
+          if (data === '[DONE]') {
+            output.innerHTML    = escapeHtml(text);
+            status.textContent  = '✓ Done';
+            status.className    = 'status done';
+            return;
+          }
+          try {
+            text += JSON.parse(data);
+            output.innerHTML = escapeHtml(text) + '<span class="cursor"></span>';
+          } catch (_) {}
+        }
+      }
+    } catch (err) {
+      output.textContent = 'Network error: ' + err.message;
+      status.textContent = 'Error';
+      status.className   = 'status';
+    } finally {
+      isStreaming  = false;
+      btn.disabled = false;
+    }
+  }
+
+  function clearOutput() {
+    document.getElementById('output').innerHTML =
+      '<span style="color:#30363d">Your answer will appear here token by token…</span>';
+    document.getElementById('status').textContent = 'Ready';
+    document.getElementById('status').className   = 'status';
+  }
+
+  function escapeHtml(str) {
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  }
+
+  document.getElementById('msg').addEventListener('keydown', e => {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) stream();
+  });
+    </script>
+</body>
+</html>
