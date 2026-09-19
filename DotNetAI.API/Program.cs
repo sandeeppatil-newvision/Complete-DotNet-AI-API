@@ -5,7 +5,6 @@ using DotNetAI.API.Services;
 using Microsoft.SemanticKernel;
 using OpenAI;
 using Scalar.AspNetCore;
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -44,6 +43,7 @@ builder.Services.AddSingleton(sp =>
 });
 builder.Services.AddSingleton<RagService>();
 builder.Services.AddSingleton<ConversationService>();
+builder.Services.AddSingleton<QdrantVectorService>();
 
 var app = builder.Build();
 

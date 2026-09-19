@@ -14,6 +14,7 @@
     <PackageReference Include="Microsoft.SemanticKernel" Version="1.78.0" />
     <PackageReference Include="Microsoft.SemanticKernel.Agents.Core" Version="1.80.0" />
     <PackageReference Include="OpenAI" Version="2.10.0" />
+    <PackageReference Include="Qdrant.Client" Version="1.19.0" />
     <PackageReference Include="Scalar.AspNetCore" Version="2.16.11" />
   </ItemGroup>
 
