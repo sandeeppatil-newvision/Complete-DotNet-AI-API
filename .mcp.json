@@ -1,0 +1,9 @@
+{
+  "servers": {
+    "dotnet-ai-api": {
+      "type": "stdio",
+      "command": "D:\\AIWithSandeep\\mcp-server\\DotNetAI.MCP.exe",
+      "args": []
+    }
+  }
+}

@@ -1,0 +1,6 @@
+@DotNetAI.MCP_HostAddress = http://localhost:5242
+
+GET {{DotNetAI.MCP_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

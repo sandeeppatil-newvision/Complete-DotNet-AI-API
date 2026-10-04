@@ -6,6 +6,7 @@ using Azure.Search.Documents.Indexes.Models;
 using Azure.Search.Documents.Models;
 using OpenAI;
 using OpenAI.Chat;
+using System.Text.RegularExpressions;
 
 namespace DotNetAI.API.Services
 {
@@ -76,18 +77,22 @@ namespace DotNetAI.API.Services
             var embClient = _openAIClient.GetEmbeddingClient(_configuration["AzureOpenAI:EmbeddingDeployment"]!);
 
             var docs = new List<SearchDocument>();
+            // Make a key-safe version of the document name
+            var safeName = Regex.Replace(docName, @"[^A-Za-z0-9_\-=]", "_");
+
             for (int i = 0; i < chunks.Count; i++)
             {
-                var embedding = await embClient
-                    .GenerateEmbeddingAsync(chunks[i]);
+                var embedding = await embClient.GenerateEmbeddingAsync(chunks[i]);
+
                 docs.Add(new SearchDocument
                 {
-                    ["id"] = $"{docName}-chunk-{i}",
-                    ["docName"] = docName,
+                    ["id"] = $"{safeName}-chunk-{i}",   // e.g. dotnet_ai-chunk-0
+                    ["docName"] = docName,              // original name stays readable
                     ["content"] = chunks[i],
                     ["contentVector"] = embedding.Value.ToFloats().ToArray()
                 });
             }
+
             await _searchClient.UploadDocumentsAsync(docs);
             return chunks.Count; // return how many chunks were stored
         }
