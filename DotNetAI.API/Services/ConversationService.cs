@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.AI;
 using OpenAI.Chat;
 using System.Collections.Concurrent;
+using System.Runtime.CompilerServices;
+using System.Text;
 using static DotNetAI.API.Models.ConversationModels;
 
 namespace DotNetAI.API.Services
@@ -66,5 +68,47 @@ namespace DotNetAI.API.Services
                 return new ConversationSummary(sessionId, 0, string.Empty);
             }
         }
+
+        public async IAsyncEnumerable<string> ChatStreamAsync(string sessionId, string userMessage, [EnumeratorCancellation] CancellationToken ct = default)
+        {
+            // Same memory as ChatAsync — one history per session
+            var conversationHistory = conversationHistories.GetOrAdd(sessionId, _ => new List<OpenAI.Chat.ChatMessage>
+            {
+                new SystemChatMessage(
+                    "You are a helpful .NET developer assistant. " +
+                    "Remember everything said in this conversation.")
+            });
+
+            conversationHistory.Add(new UserChatMessage(userMessage));
+
+            var chatClient = azureOpenAIClient.GetChatClient(
+                configuration["AzureOpenAI:DeploymentName"]!);
+
+            var fullReply = new StringBuilder();
+
+            try
+            {
+                // Same streaming call as StreamController — but with the full history
+                await foreach (var update in chatClient.CompleteChatStreamingAsync(
+                    conversationHistory, cancellationToken: ct))
+                {
+                    foreach (var part in update.ContentUpdate)
+                    {
+                        if (!string.IsNullOrEmpty(part.Text))
+                        {
+                            fullReply.Append(part.Text);
+                            yield return part.Text;     // one token to the controller
+                        }
+                    }
+                }
+            }
+            finally
+            {
+                // Save the reply to memory — even if the user pressed Stop halfway
+                if (fullReply.Length > 0)
+                    conversationHistory.Add(new AssistantChatMessage(fullReply.ToString()));
+            }
+        }
+
     }
 }

@@ -1,6 +1,7 @@
 ﻿using DotNetAI.API.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 using static DotNetAI.API.Models.ConversationModels;
 
 namespace DotNetAI.API.Controllers
@@ -37,5 +38,40 @@ namespace DotNetAI.API.Controllers
             }
             return Ok(summary);
         }
+
+
+        /// <summary>Stream a reply token by token — same SessionId = AI remembers</summary>
+        [HttpPost("stream")]
+        public async Task Stream([FromBody] ConversationRequest request, CancellationToken ct)
+        {
+            if (string.IsNullOrWhiteSpace(request.SessionId) || string.IsNullOrWhiteSpace(request.Message))
+            {
+                Response.StatusCode = 400;
+                return;
+            }
+
+            Response.ContentType = "text/event-stream";
+            Response.Headers["Cache-Control"] = "no-cache";
+            Response.Headers["X-Accel-Buffering"] = "no";
+
+            await foreach (var token in conversationService.ChatStreamAsync(request.SessionId, request.Message, ct))
+            {
+                await Response.WriteAsync($"data: {JsonSerializer.Serialize(token)}\n\n", ct);
+                await Response.Body.FlushAsync(ct);
+            }
+
+            await Response.WriteAsync("data: [DONE]\n\n", ct);
+            await Response.Body.FlushAsync(ct);
+        }
+
+        /// <summary>Start a new chat — forget this session</summary>
+        [HttpDelete("{sessionId}")]
+        public IActionResult Clear(string sessionId)
+        {
+            conversationService.clearConversationHistory(sessionId);
+            return NoContent();
+        }
+
+
     }
 }

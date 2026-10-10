@@ -7,6 +7,15 @@ using OpenAI;
 using Scalar.AspNetCore;
 var builder = WebApplication.CreateBuilder(args);
 
+// CORS — allow the React dev server to call this API
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("ReactApp", policy =>
+        policy.WithOrigins("http://localhost:5173")
+              .AllowAnyHeader()
+              .AllowAnyMethod());
+});
+
 // Add services to the container.
 
 builder.Services.AddControllers();
@@ -56,6 +65,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors("ReactApp");   // must come before UseAuthorization and MapControllers
 
 app.UseAuthorization();
 
