@@ -1,0 +1,157 @@
+.docs {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  height: 100vh;
+  background: #0f0b2a;
+  color: #eeeaff;
+  font-family: system-ui, sans-serif;
+  text-align: left;
+}
+.docs-side {
+  border-right: 1px solid #2a2160;
+  padding: 72px 16px 16px;
+  overflow-y: auto;
+}
+.docs-side h2 {
+  margin: 0 0 12px;
+  font-size: 18px;
+}
+.upload {
+  width: 100%;
+  padding: 12px;
+  border: 0;
+  border-radius: 10px;
+  background: #5b2bdc;
+  color: #fff;
+  font-size: 15px;
+  cursor: pointer;
+}
+.upload:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+.error {
+  color: #ff8a8a;
+  font-size: 13px;
+}
+.docs-side ul {
+  list-style: none;
+  padding: 0;
+  margin: 16px 0 0;
+}
+.docs-side li {
+  position: relative;
+  padding: 10px 32px 10px 12px;
+  margin-bottom: 8px;
+  border-radius: 10px;
+  background: #1a1446;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+.docs-side li.active {
+  border-color: #3ddcff;
+}
+.docs-side .name {
+  display: block;
+  font-size: 14px;
+  word-break: break-all;
+}
+.docs-side .meta {
+  font-size: 12px;
+  color: #9a93c4;
+}
+.docs-side .del {
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  background: none;
+  border: 0;
+  color: #9a93c4;
+  font-size: 18px;
+  cursor: pointer;
+}
+.docs-chat {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 24px 32px;
+}
+.docs-chat header {
+  padding: 0 0 12px;
+  border-bottom: 1px solid #2a2160;
+  color: #9a93c4;
+}
+.docs-chat header b {
+  color: #eeeaff;
+}
+.msgs {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 0;
+}
+.empty {
+  margin: auto;
+  color: #9a93c4;
+  text-align: center;
+  padding-top: 30vh;
+}
+.msg {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 14px;
+}
+.msg.user {
+  align-items: flex-end;
+}
+.bubble {
+  max-width: 75%;
+  padding: 12px 16px;
+  border-radius: 14px;
+  white-space: pre-wrap;
+  line-height: 1.5;
+}
+.msg.user .bubble {
+  background: #5b2bdc;
+}
+.msg.assistant .bubble {
+  background: #1a1446;
+  border: 1px solid #2a2160;
+}
+.sources {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+  flex-wrap: wrap;
+}
+.chip {
+  font-size: 12px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid #3ddcff;
+  color: #3ddcff;
+  cursor: help;
+}
+.ask {
+  display: flex;
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 1px solid #2a2160;
+}
+.ask input {
+  flex: 1;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid #2a2160;
+  background: #140f38;
+  color: #eeeaff;
+  font-size: 15px;
+}
+.ask button {
+  padding: 0 22px;
+  border: 0;
+  border-radius: 10px;
+  background: #5b2bdc;
+  color: #fff;
+  font-size: 15px;
+  cursor: pointer;
+}

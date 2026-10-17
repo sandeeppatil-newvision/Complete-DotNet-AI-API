@@ -1,0 +1,24 @@
+.tabs {
+  position: fixed;
+  top: 14px;
+  left: 16px;
+  z-index: 10;
+  display: flex;
+  gap: 6px;
+  padding: 4px;
+  border-radius: 12px;
+  background: #1a1446;
+}
+.tabs button {
+  border: 0;
+  border-radius: 9px;
+  padding: 8px 14px;
+  cursor: pointer;
+  background: transparent;
+  color: #9a93c4;
+  font-size: 14px;
+}
+.tabs button.on {
+  background: #5b2bdc;
+  color: #fff;
+}

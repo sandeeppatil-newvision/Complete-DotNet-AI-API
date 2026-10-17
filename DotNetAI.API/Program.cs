@@ -53,6 +53,7 @@ builder.Services.AddSingleton(sp =>
 builder.Services.AddSingleton<RagService>();
 builder.Services.AddSingleton<ConversationService>();
 builder.Services.AddSingleton<QdrantVectorService>();
+builder.Services.AddSingleton<DocumentService>();
 
 var app = builder.Build();
 
