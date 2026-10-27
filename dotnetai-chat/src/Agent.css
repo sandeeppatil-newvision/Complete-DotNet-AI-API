@@ -1,0 +1,134 @@
+.agent {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: #0f0b2a;
+  color: #eeeaff;
+  font-family: system-ui, sans-serif;
+  text-align: left;
+}
+.agent-msgs {
+  flex: 1;
+  overflow-y: auto;
+  padding: 72px 20px 16px;
+  max-width: 860px;
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+.agent-empty {
+  text-align: center;
+  margin-top: 8vh;
+  color: #9a93c4;
+}
+.agent-empty h2 {
+  color: #eeeaff;
+}
+.chips {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 20px;
+  align-items: center;
+}
+.chips button {
+  max-width: 560px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  cursor: pointer;
+  background: #1a1446;
+  color: #eeeaff;
+  border: 1px solid #2a2160;
+  font-size: 14px;
+  text-align: left;
+}
+.chips button:hover {
+  border-color: #3ddcff;
+}
+
+.bubble {
+  padding: 12px 14px;
+  border-radius: 14px;
+  margin-bottom: 12px;
+  white-space: pre-wrap;
+  line-height: 1.5;
+}
+.bubble.user {
+  background: #5b2bdc;
+  margin-left: 20%;
+}
+.bubble.assistant {
+  background: #1a1446;
+  margin-right: 8%;
+}
+
+.step {
+  margin-bottom: 10px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: #130e38;
+  border: 1px solid #2a2160;
+  font-size: 13px;
+}
+.step-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+.step .args {
+  color: #9a93c4;
+  font-family: ui-monospace, monospace;
+}
+.step-result {
+  margin-top: 6px;
+  color: #3ddcff;
+  font-family: ui-monospace, monospace;
+  word-break: break-word;
+}
+.step .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #3ddcff;
+}
+.step.running .dot {
+  animation: pulse 0.9s infinite;
+  background: #ffcb47;
+}
+@keyframes pulse {
+  50% {
+    opacity: 0.25;
+  }
+}
+
+.agent-input {
+  display: flex;
+  gap: 8px;
+  padding: 14px 20px 20px;
+  max-width: 860px;
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+.agent-input input {
+  flex: 1;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid #2a2160;
+  background: #1a1446;
+  color: #eeeaff;
+  font-size: 15px;
+}
+.agent-input button {
+  border: 0;
+  border-radius: 12px;
+  padding: 0 18px;
+  background: #5b2bdc;
+  color: #fff;
+  font-size: 15px;
+  cursor: pointer;
+}
+.agent-input button.stop {
+  background: #c0392b;
+}

@@ -17,6 +17,8 @@ namespace DotNetAI.API.Services
     public record PageText(int Page, string Text);
     public record SourceChunk(int Page, string Text, float Score);
 
+    public record DocHit(string FileName, int Page, string Text, float Score);
+
     public class DocumentService
     {
         private readonly OpenAIClient _openAIClient;
@@ -216,6 +218,39 @@ namespace DotNetAI.API.Services
             if (!_documents.TryRemove(documentId, out _)) return false;
             await _qdrant.DeleteAsync(_collection, MatchKeyword("documentId", documentId));
             return true;
+        }
+
+
+        // ── AGENT: search every uploaded PDF, or just one by (part of) its file name ──
+        public async Task<List<DocHit>> SearchAllAsync(string question, string? fileName = null, int top = 5, CancellationToken ct = default)
+        {
+            Filter? filter = null;
+
+            if (!string.IsNullOrWhiteSpace(fileName))
+            {
+                var match = _documents.Values.FirstOrDefault(d =>
+                    d.FileName.Contains(fileName, StringComparison.OrdinalIgnoreCase));
+                if (match is null) return new List<DocHit>();
+
+                // documentId has a payload index (EP14), so this stays fast
+                filter = new Filter { Must = { MatchKeyword("documentId", match.Id) } };
+            }
+
+            var embClient = _openAIClient.GetEmbeddingClient(_config["AzureOpenAI:EmbeddingDeployment"]!);
+            var q = await embClient.GenerateEmbeddingAsync(question, cancellationToken: ct);
+
+            var results = await _qdrant.SearchAsync(
+                collectionName: _collection,
+                vector: q.Value.ToFloats().ToArray(),
+                filter: filter,                       // null = search everything
+                limit: (ulong)top,
+                cancellationToken: ct);
+
+            return results.Select(r => new DocHit(
+                r.Payload["fileName"].StringValue,
+                (int)r.Payload["page"].IntegerValue,
+                r.Payload["content"].StringValue,
+                r.Score)).ToList();
         }
     }
 }

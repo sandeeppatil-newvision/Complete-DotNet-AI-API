@@ -1,6 +1,7 @@
 import { useState } from "react";
 import App from "./App";
 import DocumentsPage from "./DocumentsPage";
+import AgentPage from "./AgentPage";
 import "./Root.css";
 
 export default function Root() {
@@ -21,6 +22,13 @@ export default function Root() {
         >
           📄 Documents
         </button>
+
+        <button
+          className={tab === "agent" ? "on" : ""}
+          onClick={() => setTab("agent")}
+        >
+          🤖 Agent
+        </button>
       </nav>
       {/* hidden instead of unmounted, so each tab keeps its state */}
       <div hidden={tab !== "chat"}>
@@ -28,6 +36,9 @@ export default function Root() {
       </div>
       <div hidden={tab !== "docs"}>
         <DocumentsPage />
+      </div>
+      <div hidden={tab !== "agent"}>
+        <AgentPage />
       </div>
     </>
   );

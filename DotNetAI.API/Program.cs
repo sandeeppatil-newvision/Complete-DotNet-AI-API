@@ -55,6 +55,9 @@ builder.Services.AddSingleton<ConversationService>();
 builder.Services.AddSingleton<QdrantVectorService>();
 builder.Services.AddSingleton<DocumentService>();
 
+builder.Services.AddSingleton<AgentTools>();     // ← new
+builder.Services.AddSingleton<AgentService>();   // ← new
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
