@@ -5,6 +5,7 @@ using DotNetAI.API.Services;
 using Microsoft.SemanticKernel;
 using OpenAI;
 using Scalar.AspNetCore;
+using System.Threading.RateLimiting;
 var builder = WebApplication.CreateBuilder(args);
 
 // CORS — allow the React dev server to call this API
@@ -58,6 +59,19 @@ builder.Services.AddSingleton<DocumentService>();
 builder.Services.AddSingleton<AgentTools>();     // ← new
 builder.Services.AddSingleton<AgentService>();   // ← new
 
+builder.Services.AddRateLimiter(o =>
+{
+    o.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    o.AddPolicy("agent", ctx => RateLimitPartition.GetFixedWindowLimiter(
+        ctx.Connection.RemoteIpAddress?.ToString() ?? "local",
+        _ => new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = 10,
+            Window = TimeSpan.FromMinutes(1),
+            QueueLimit = 0
+        }));
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -71,6 +85,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseCors("ReactApp");   // must come before UseAuthorization and MapControllers
+app.UseRateLimiter();
 
 app.UseAuthorization();
 

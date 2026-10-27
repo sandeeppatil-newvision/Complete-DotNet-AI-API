@@ -70,23 +70,35 @@ namespace DotNetAI.API.Services
         private async Task<string> SearchDocumentsAsync(JsonElement args, CancellationToken ct)
         {
             var query = args.GetProperty("query").GetString() ?? "";
+            if (query.Length > 300) return "Query too long (max 300 characters).";
+
             string? documentName = args.TryGetProperty("document_name", out var d) ? d.GetString() : null;
+            if (documentName is { Length: > 100 }) return "Document name too long.";
 
             var hits = await _docs.SearchAllAsync(query, documentName, top: 5, ct: ct);
             if (hits.Count == 0) return "No matching passages found.";
 
-            return string.Join("\n\n", hits.Select(h => $"[{h.FileName}, p. {h.Page}]\n{h.Text}"));
+            return string.Join("\n\n", hits.Select(h =>
+                $"[{h.FileName}, p. {h.Page}]\n{ToolResultGuard.CleanPassage(h.Text)}"));
         }
         private static string Calculate(JsonElement args)
         {
             var expression = args.GetProperty("expression").GetString() ?? "";
+            if (expression.Length > 100) return "Expression too long (max 100 characters).";
 
             // Never trust model-written input: only digits, operators, brackets and spaces
             if (!Regex.IsMatch(expression, @"^[0-9+\-*/(). ]+$"))
                 return "Only numbers and + - * / ( ) are allowed.";
 
-            var result = new DataTable().Compute(expression, null);
-            return $"{expression} = {result}";
+            try
+            {
+                var result = new DataTable().Compute(expression, null);
+                return $"{expression} = {result}";
+            }
+            catch (Exception)
+            {
+                return "That expression could not be calculated.";
+            }
         }
 
     }
