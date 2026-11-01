@@ -25,10 +25,17 @@ namespace DotNetAI.API.Services
             //    host: config["Qdrant:Host"] ?? "localhost",
             //    port: int.TryParse(config["Qdrant:Port"], out var p) ? p : 6334);
 
+            //_qdrant = new QdrantClient(
+            //         host: config["Qdrant:Host"] ?? "localhost",
+            //         port: int.TryParse(config["Qdrant:Port"], out var p) ? p : 6334,
+            //         https: false);   // ← plain HTTP, no TLS for local Docker
+
+            // Local Docker: plain gRPC, no key. Qdrant Cloud: TLS + API key from configuration.
             _qdrant = new QdrantClient(
-     host: config["Qdrant:Host"] ?? "localhost",
-     port: int.TryParse(config["Qdrant:Port"], out var p) ? p : 6334,
-     https: false);   // ← plain HTTP, no TLS for local Docker
+                host: config["Qdrant:Host"] ?? "localhost",
+                port: int.TryParse(config["Qdrant:Port"], out var p) ? p : 6334,
+                https: bool.TryParse(config["Qdrant:Https"], out var h) && h,
+                apiKey: string.IsNullOrWhiteSpace(config["Qdrant:ApiKey"]) ? null : config["Qdrant:ApiKey"]);
         }
 
         // ── PART 1: Create Qdrant collection if it doesn't exist ─────────────

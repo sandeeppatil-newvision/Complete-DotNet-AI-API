@@ -40,10 +40,17 @@ namespace DotNetAI.API.Services
             _collection = config["Qdrant:PdfCollectionName"] ?? "pdf-documents";
 
             // Same setup as QdrantVectorService — gRPC port 6334, no TLS for local Docker
+            //_qdrant = new QdrantClient(
+            //    host: config["Qdrant:Host"] ?? "localhost",
+            //    port: int.TryParse(config["Qdrant:Port"], out var p) ? p : 6334,
+            //    https: false); 
+
+            // Local Docker: plain gRPC, no key. Qdrant Cloud: TLS + API key from configuration.
             _qdrant = new QdrantClient(
                 host: config["Qdrant:Host"] ?? "localhost",
                 port: int.TryParse(config["Qdrant:Port"], out var p) ? p : 6334,
-                https: false); 
+                https: bool.TryParse(config["Qdrant:Https"], out var h) && h,
+                apiKey: string.IsNullOrWhiteSpace(config["Qdrant:ApiKey"]) ? null : config["Qdrant:ApiKey"]);
         }
 
         public IEnumerable<DocumentInfo> GetDocuments() =>

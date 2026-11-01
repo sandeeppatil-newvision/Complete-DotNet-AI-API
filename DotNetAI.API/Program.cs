@@ -2,17 +2,22 @@ using Azure;
 using Azure.AI.OpenAI;
 using DotNetAI.API.Plugins;
 using DotNetAI.API.Services;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.SemanticKernel;
 using OpenAI;
 using Scalar.AspNetCore;
 using System.Threading.RateLimiting;
 var builder = WebApplication.CreateBuilder(args);
 
-// CORS — allow the React dev server to call this API
+// CORS — allowed origins come from configuration
+// Local: falls back to the Vite dev server. Azure: set Cors__Origins__0 in App Service.
+var corsOrigins = builder.Configuration.GetSection("Cors:Origins").Get<string[]>()
+                  ?? ["http://localhost:5173"];
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("ReactApp", policy =>
-        policy.WithOrigins("http://localhost:5173")
+        policy.WithOrigins(corsOrigins)
               .AllowAnyHeader()
               .AllowAnyMethod());
 });
@@ -72,7 +77,18 @@ builder.Services.AddRateLimiter(o =>
         }));
 });
 
+// App Service runs behind a proxy: trust X-Forwarded-For / X-Forwarded-Proto
+// so the rate limiter sees the real client IP.
+builder.Services.Configure<ForwardedHeadersOptions>(o =>
+{
+    o.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    o.KnownIPNetworks.Clear();
+    o.KnownProxies.Clear();
+});
+
 var app = builder.Build();
+
+app.UseForwardedHeaders();   // first middleware: before anything reads the client IP
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -92,5 +108,6 @@ app.UseAuthorization();
 app.UseStaticFiles();
 
 app.MapControllers();
+app.MapGet("/health", () => Results.Ok(new { status = "ok", time = DateTime.UtcNow }));
 
 app.Run();
