@@ -4,7 +4,7 @@ import {
   listDocuments,
   deleteDocument,
   askDocument,
-} from "./api/docapi";
+} from "./api/docApi";
 import "./Documents.css";
 
 export default function DocumentsPage() {
